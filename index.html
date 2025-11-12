@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ผู้เข้าแข่งขัน</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Inter','Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+  background: linear-gradient(135deg,#0f0f1e 0%,#1a1a2e 50%,#16213e 100%);
+  min-height:100vh; padding:40px 20px; color:#e0e0e0; position:relative; overflow-x:hidden;
+}
+body::before {
+  content:''; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(120,119,198,0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255,107,107,0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(72,219,251,0.1) 0%, transparent 50%);
+  pointer-events:none; z-index:0;
+}
+.container { max-width:1200px; margin:0 auto; position:relative; z-index:1; }
+.header { text-align:center; margin-bottom:50px; animation:fadeInDown 0.8s ease; }
+h2 {
+  font-size:3rem;
+  background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; margin-bottom:10px; font-weight:800; letter-spacing:-1px;
+}
+.subtitle { color:#a0a0b0; font-size:1.1rem; font-weight:300; }
+.search-container { margin-bottom:40px; animation:fadeInUp 0.8s ease 0.2s both; }
+.search-wrapper { position:relative; max-width:600px; margin:0 auto; }
+#searchInput {
+  width:100%; padding:18px 55px 18px 20px; font-size:1.05rem;
+  border:2px solid rgba(102,126,234,0.3); border-radius:15px;
+  background:rgba(30,30,50,0.6); backdrop-filter:blur(10px); color:#e0e0e0;
+  transition:all 0.3s ease; outline:none;
+}
+#searchInput::placeholder { color:#7a7a8c; }
+#searchInput:focus {
+  border-color:#667eea; background:rgba(30,30,50,0.8);
+  box-shadow:0 8px 30px rgba(102,126,234,0.2); transform:translateY(-2px);
+}
+.search-icon { position:absolute; right:20px; top:50%; transform:translateY(-50%);
+  color:#667eea; font-size:1.3rem; pointer-events:none;
+}
+.stats-container { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:20px; margin-bottom:40px; animation:fadeInUp 0.8s ease 0.4s both;
+}
+.stat-card {
+  background:rgba(30,30,50,0.6); backdrop-filter:blur(10px);
+  border:1px solid rgba(102,126,234,0.2); border-radius:15px; padding:25px; text-align:center;
+  transition:all 0.3s ease;
+}
+.stat-card:hover {
+  transform:translateY(-5px); box-shadow:0 10px 30px rgba(102,126,234,0.3);
+  border-color:#667eea;
+}
+.stat-number {
+  font-size:2.5rem; font-weight:700;
+  background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.stat-label { color:#a0a0b0; font-size:0.95rem; margin-top:8px; }
+.contestants-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:25px; animation:fadeInUp 0.8s ease 0.6s both;
+}
+.contestant-card {
+  background:rgba(30,30,50,0.6); backdrop-filter:blur(10px);
+  border:1px solid rgba(102,126,234,0.2); border-radius:20px; padding:30px;
+  transition:all 0.4s cubic-bezier(0.175,0.885,0.32,1.275); position:relative; overflow:hidden;
+}
+.contestant-card::before {
+  content:''; position:absolute; top:0; left:0; width:100%; height:4px;
+  background:linear-gradient(90deg,#667eea 0%,#764ba2 100%);
+  transform:scaleX(0); transform-origin:left; transition:transform 0.4s ease;
+}
+.contestant-card:hover::before { transform:scaleX(1); }
+.contestant-card:hover { transform:translateY(-10px) scale(1.02);
+  box-shadow:0 20px 40px rgba(102,126,234,0.3); border-color:#667eea;
+}
+.contestant-number {
+  position:absolute; top:15px; right:15px;
+  background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  color:white; width:45px; height:45px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:1.1rem; box-shadow:0 4px 15px rgba(102,126,234,0.4);
+}
+.contestant-name { font-size:1.4rem; font-weight:600; color:#ffffff; margin-bottom:8px; padding-right:50px; }
+.contestant-category {
+  display:inline-block; padding:6px 14px;
+  background:rgba(102,126,234,0.2); border:1px solid rgba(102,126,234,0.4);
+  border-radius:20px; font-size:0.85rem; color:#a8b3ff; margin-top:10px;
+}
+.no-results { text-align:center; padding:60px 20px; color:#7a7a8c; font-size:1.2rem; animation:fadeIn 0.5s ease; }
+.no-results-icon { font-size:4rem; margin-bottom:20px; opacity:0.5; }
+@keyframes fadeInDown { from{opacity:0; transform:translateY(-30px);} to{opacity:1; transform:translateY(0);} }
+@keyframes fadeInUp { from{opacity:0; transform:translateY(30px);} to{opacity:1; transform:translateY(0);} }
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+@media(max-width:768px){
+  h2{font-size:2rem;}
+  .contestants-grid{grid-template-columns:1fr;}
+  .stats-container{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+  <h2>🏆 ผู้เข้าแข่งขัน</h2>
+  <p class="subtitle">ระบบจัดการผู้เข้าร่วมการแข่งขัน</p>
+</div>
+
+<div class="search-container">
+  <div class="search-wrapper">
+    <input type="text" id="searchInput" placeholder="🔍 ค้นหาชื่อผู้เข้าแข่งขัน..." autocomplete="off">
+    <span class="search-icon">⚡</span>
+  </div>
+</div>
+
+<div class="stats-container">
+  <div class="stat-card">
+    <div class="stat-number" id="totalCount">0</div>
+    <div class="stat-label">ผู้เข้าแข่งขันทั้งหมด</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" id="categoryCount">0</div>
+    <div class="stat-label">ประเภทการแข่งขัน</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" id="filteredCount">0</div>
+    <div class="stat-label">ผลการค้นหา</div>
+  </div>
+</div>
+
+<div class="contestants-grid" id="contestantsGrid"></div>
+</div>
+
+<script>
+// ข้อมูลผู้เข้าแข่งขันทั้งหมด (64 รายการ)
+const contestants = [
+  {id:1,name:"ณฐพงศ์ หนูห่วง",category:"Valorant"},
+  {id:2,name:"อธิป เต่าทอง",category:"เปตอง ชายเดี่ยว"},
+  {id:3,name:"ชยพล โคกทัพ",category:"หมากรุก ชาย"},
+  {id:4,name:"ณัฐสิทธิ์ มีกำเนิด",category:"ชักเย่อ ชาย"},
+  {id:5,name:"ดลภัคร สุขสมจิตร",category:"ฟุตซอล ชาย"},
+  {id:6,name:"กิตติญาทร นาท",category:"Rov"},
+  {id:7,name:"เพชรรัตน์ เข็มเพ็ชร",category:"เปตอง หญิงคู่"},
+  {id:8,name:"ณฐนนท์ เหมือนเอี่ยม",category:"แบดมินตัน ชายเดี่ยว"},
+  {id:9,name:"ณฐนนท์ เหมือนเอี่ยม",category:"แบดมินตัน ชายคู่"},
+  {id:10,name:"ธนาธิป หอมชื่น",category:"เทเบิลเทนนิส ชายเดี่ยว"},
+  {id:11,name:"ภูริภัทร ปักษาไพร",category:"แบดมินตัน ชายเดี่ยว"},
+  {id:12,name:"กิตติศักดิ์ เทพเภา",category:"ฟุตซอล ชาย"},
+  {id:13,name:"ศิรสิทธิ์ อุดม",category:"ฟุตซอล ชาย"},
+  {id:14,name:"ธเนศ เจริญธนวัฒน์",category:"ชักเย่อ ชาย"},
+  {id:15,name:"อมลรดา ศรีพรหมมินทร์",category:"เปตอง หญิงคู่"},
+  {id:16,name:"คอปเตอร์",category:"บาสเกตบอล ทีมชาย"},
+  {id:17,name:"คอปเตอร์",category:"กินวิบาก ชาย"},
+  {id:18,name:"ชวกร คำแสง",category:"ฟุตซอล ชาย"},
+  {id:19,name:"ณัฐภัทร อังกาบ",category:"วิ่งเปรี้ยว"},
+  {id:20,name:"ธนกฤต อิ่มเต็ม",category:"Valorant"},
+  {id:21,name:"รัฐตะวัณ กอบแป",category:"เทเบิลเทนนิส ชายคู่"},
+  {id:22,name:"รัฐตะวัณ กอบแป",category:"บาสเกตบอล ทีมชาย"},
+  {id:23,name:"วีระชัย ไทรชมภู",category:"เทเบิลเทนนิส ชายเดี่ยว"},
+  {id:24,name:"คริส รักการ",category:"ฟุตซอล ชาย"},
+  {id:25,name:"คริส รักการ",category:"Valorant"},
+  {id:26,name:"จิรายุ เทพพิทักษ์",category:"ฟุตซอล ชาย"},
+  {id:27,name:"กิตติพงษ์ พิมเสน",category:"Pubg mobile"},
+  {id:28,name:"จักรีวุฒิ พรหมมินทร์",category:"Valorant"},
+  {id:29,name:"อธินา",category:"แบดมินตัน หญิงเดี่ยว"},
+  {id:30,name:"อธินา",category:"แบดมินตัน หญิงคู่"},
+  {id:31,name:"อธินา",category:"แบดมินตัน คู่ผสม"},
+  {id:32,name:"อธินา",category:"เทเบิลเทนนิส หญิงเดี่ยว"},
+  {id:33,name:"อธินา",category:"แชร์บอล"},
+  {id:34,name:"จักรีวิทย์ พรหมเมือง",category:"หมากรุก ชาย"},
+  {id:35,name:"จักรีวิทย์ พรหมเมือง",category:"ชักเย่อ ชาย"},
+  {id:36,name:"อธินา",category:"หมากฮอส"},
+  {id:37,name:"สุรวุธ จิ๋วเมือง",category:"Valorant"},
+  {id:38,name:"จักรีวิทย์ พรหมเมือง",category:"Valorant"},
+  {id:39,name:"กิตติญาทร นาท",category:"ชักเย่อ ชาย"},
+  {id:40,name:"อดิศร บัวสุวรรณ์",category:"Rov"},
+  {id:41,name:"อดิศร เต่าทอง",category:"Rov"},
+  {id:42,name:"อดิศร เต่าทอง",category:"กินวิบาก ชาย"},
+  {id:43,name:"อดิศร บัวสุวรรณ์",category:"กินวิบาก ชาย"},
+  {id:44,name:"อดิศร บัวสุวรรณ์",category:"วิ่งกระสอบ ชาย"},
+  {id:45,name:"รัฐตะวัณ กอบแป",category:"Rov"},
+  {id:46,name:"อธิป เต่าทอง",category:"เปตอง คู่ผสม"},
+  {id:47,name:"อธิป เต่าทอง",category:"Rov"},
+  {id:48,name:"อธิป เต่าทอง",category:"เปตอง ชายคู่"},
+  {id:49,name:"ชยพล โคกทัพ",category:"หมากรุก ชาย"},
+  {id:50,name:"ศิรวิชญ์ ปะละตุ่น",category:"หมากฮอส"},
+  {id:51,name:"ธีระพงษ์ สารภักดี",category:"ชักเย่อ ชาย"},
+  {id:52,name:"ศิรวิชญ์ ปะละตุ่น",category:"ชักเย่อ ชาย"},
+  {id:53,name:"ยศวรรธน์ ผาสุกานนท์",category:"Rov"},
+  {id:54,name:"ศิรวิชญ์ ปะละตุ่น",category:"Rov"},
+  {id:55,name:"อธินา",category:"ชักเย่อ ผสม"},
+  {id:56,name:"อธินา",category:"Pubg mobile"},
+  {id:57,name:"อธินา",category:"วอลเลย์บอล"},
+  {id:58,name:"อธินา",category:"บาสเกตบอล ทีมหญิง"},
+  {id:59,name:"สุรวุธ",category:"แบดมินตัน ชายคู่"},
+  {id:60,name:"ชวกร คำแสง",category:"วอลเลย์บอล"},
+  {id:61,name:"รณภูมิ สีแก้ว",category:"ฟุตซอล ชาย"},
+  {id:62,name:"กิตติญาทร นาท",category:"Valorant"},
+  {id:63,name:"คริส รักการ",category:"Valorant"},
+  {id:64,name:"ธนาธิป หอมชื่น, รัฐตะวัณ กอบแป",category:"เทเบิลเทนนิส ชายคู่"}
+];
+
+// DOM Elements
+const searchInput = document.getElementById('searchInput');
+const contestantsGrid = document.getElementById('contestantsGrid');
+const totalCount = document.getElementById('totalCount');
+const categoryCount = document.getElementById('categoryCount');
+const filteredCount = document.getElementById('filteredCount');
+
+// แสดงผู้เข้าแข่งขัน
+function displayContestants(data) {
+  if (data.length === 0) {
+    contestantsGrid.innerHTML = `<div class="no-results" style="grid-column:1/-1;">
+      <div class="no-results-icon">🔍</div><div>ไม่พบผู้เข้าแข่งขันที่ค้นหา</div></div>`;
+    filteredCount.textContent = '0';
+    return;
+  }
+  contestantsGrid.innerHTML = data.map(c => `
+    <div class="contestant-card">
+      <div class="contestant-number">${c.id}</div>
+      <div class="contestant-name">${c.name}</div>
+      <div class="contestant-category">${c.category}</div>
+    </div>
+  `).join('');
+  filteredCount.textContent = data.length;
+}
+
+// อัปเดตสถิติ
+function updateStats() {
+  const categories = new Set(contestants.map(c => c.category));
+  totalCount.textContent = contestants.length;
+  categoryCount.textContent = categories.size;
+}
+
+// ค้นหาผู้เข้าแข่งขัน
+searchInput.addEventListener('input', (e) => {
+  const searchTerm = e.target.value.toLowerCase().trim();
+  
+  if (searchTerm === '') {
+    displayContestants(contestants);
+    return;
+  }
+
+  const filtered = contestants.filter(contestant => 
+    contestant.name.toLowerCase().includes(searchTerm) ||
+    contestant.category.toLowerCase().includes(searchTerm)
+  );
+
+  displayContestants(filtered);
+});
+
+// เริ่มต้นแสดงผล
+displayContestants(contestants);
+updateStats();
+</script>
+
+</body>
+</html>
